@@ -27,7 +27,7 @@ function clone(v){return JSON.parse(JSON.stringify(v))}
 function getOrders(){try{const v=JSON.parse(localStorage.getItem(KEY));return Array.isArray(v)?v:seed()}catch(e){return seed()}}
 function saveOrders(v){localStorage.setItem(KEY,JSON.stringify(v))}
 function resetOrders(){localStorage.removeItem(KEY)}
-function nextId(v){const max=(v||getOrders()).reduce((m,o)=>Math.max(m,parseInt(String(o.id).replace(/\D/g,""),10)||0),0);return "ART-"+String(max+1).padStart(4,"0")}
+function nextId(v){const all=v||getOrders(),settings=window.ArtyouSettings?window.ArtyouSettings.get():{orderPrefix:"ART"},prefix=settings.orderPrefix||"ART";const max=all.reduce((m,o)=>Math.max(m,parseInt(String(o.id).replace(/\D/g,""),10)||0),0);return prefix+"-"+String(max+1).padStart(4,"0")}
 function flow(order){return order.delivery==="Ritiro in sede"?["Da preparare","Pronto","Consegnato"]:["Da preparare","Spedito","Consegnato"]}
 window.ArtyouOrders={getOrders,saveOrders,resetOrders,nextId,flow,seed,clone};
 })();
