@@ -1,9 +1,107 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Artyou Merch — Magazzino</title><link rel="stylesheet" href="admin.css"></head><body>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Artyou Merch — Magazzino</title><link rel="stylesheet" href="admin.css">
+<style>
+.inv-note{background:#fff5de;border:1px solid #f4d797;color:#684810;border-radius:9px;padding:12px 15px;font-size:13px;margin:0 0 19px;line-height:1.5}
+.inv-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:0 0 19px}
+.inv-stat{background:#fff;border:1px solid #e4e1da;border-radius:10px;padding:17px}
+.inv-stat small{color:#70777a;display:block;font-size:12px}.inv-stat strong{display:block;font:800 27px "Bricolage Grotesque";margin-top:7px}
+.inv-card{background:#fff;border:1px solid #e4e1da;border-radius:10px;margin-bottom:18px;overflow:hidden}
+.inv-heading{padding:18px 20px;display:flex;justify-content:space-between;gap:14px;align-items:center;border-bottom:1px solid #e9e7e2}
+.inv-heading h2{margin:0;font:800 20px "Bricolage Grotesque"}
+.inv-heading p{font-size:12px;color:#73787c;margin:5px 0 0}
+.inv-controls{padding:15px 20px;display:grid;grid-template-columns:minmax(180px,1fr) 185px 160px;gap:10px}
+.inv-controls input,.inv-controls select,.inv-reason select{min-width:0;width:100%;border:1px solid #d8d8d8;border-radius:6px;padding:10px;background:#fff}
+.inv-table-wrap{overflow:auto}.inv-table{min-width:790px;font-size:13px}.inv-table th,.inv-table td{padding:13px 15px;vertical-align:middle}
+.inv-table th{font-size:11px}.inv-table tr.changed{background:#fffaf0}
+.inv-name b{display:block}.inv-name small{display:block;color:#7c8185;margin-top:3px}
+.inv-code{font-size:11px;color:#858a8d}.inv-qty{display:flex;align-items:center;gap:6px}
+.inv-qty button{border:1px solid #d8d8d8;background:#f8f8f6;width:31px;height:34px;border-radius:5px;cursor:pointer;font-size:17px}
+.inv-qty button:hover{border-color:#f39a05}.inv-qty input{width:67px;height:34px;border:1px solid #c9c9c7;border-radius:5px;text-align:center;font-weight:700}
+.inv-badge{display:inline-block;border-radius:99px;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+.inv-badge.ok{background:#e1f5e9;color:#17613e}.inv-badge.low{background:#fff0c9;color:#8c5600}.inv-badge.out{background:#ffe3e3;color:#a22929}
+.inv-footer{padding:14px 20px;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;border-top:1px solid #e9e7e2;background:#fcfbf9}
+.inv-reason{display:flex;align-items:center;gap:9px;font-size:12px}.inv-reason select{width:205px}
+.inv-actions{display:flex;align-items:center;gap:8px}.inv-count{font-size:12px;color:#797c7c}
+.inv-message{font-size:12px;min-height:18px;margin:10px 20px;color:#18613e}.inv-message.error{color:#b43131}
+.inv-empty{padding:30px;text-align:center;color:#797c7c;font-size:13px}
+.inv-history{width:100%;min-width:680px}.inv-history td{font-size:12px}.inv-history .plus{color:#187b4d;font-weight:700}.inv-history .minus{color:#ad3d37;font-weight:700}
+.inv-mobile-nav{display:none}
+@media(max-width:1050px){.inv-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.inv-controls{grid-template-columns:1fr 1fr}.inv-controls input{grid-column:1/-1}}
+@media(max-width:900px){.inv-mobile-nav{display:flex;gap:10px;overflow:auto;margin:0 0 17px}.inv-mobile-nav a{white-space:nowrap;border:1px solid #ddd;background:white;padding:8px 11px;border-radius:7px;font-size:12px}.inv-mobile-nav .active{background:#151b1f;color:#f39a05}.inv-heading{align-items:flex-start}.inv-reason{flex-wrap:wrap}}
+@media(max-width:530px){.inv-controls{grid-template-columns:1fr}.inv-controls input{grid-column:auto}.inv-stat{padding:12px}.inv-stat strong{font-size:23px}.inv-heading{flex-wrap:wrap}}
+</style></head><body>
 <header class="top"><img src="https://raw.githubusercontent.com/fabioleonardi22-blip/Artyoubeta26091001/main/img/logo-orizzontale-bianco.png"><a class="trial" href="/">Prova gratis</a><span class="burger">☰</span></header><div class="redline"></div><nav class="site-nav"><span>CORSI</span><span>Improvvisazione</span><span>Corsi Amatoriali</span><span>Corsi Professionali</span><span>Workshop</span><span>Spettacoli</span><span>Festival e altro</span><span>Chi siamo</span></nav>
 <div class="shell"><aside class="side"><a href="admin.html"><span class="ico">⌂</span>Panoramica</a><a href="admin-prodotti.html"><span class="ico">▱</span>Prodotti</a><a class="active" href="admin-magazzino.html"><span class="ico">▣</span>Magazzino</a><a href="admin-ordini.html"><span class="ico">▦</span>Ordini</a><a href="#"><span class="ico">♧</span>Clienti</a><a href="#"><span class="ico">⚙</span>Impostazioni</a><a class="exit" href="/"><span class="ico">↪</span>Esci</a></aside>
-<main class="main"><div class="bar"><div><div class="small">Merch Artyou</div><h1>Magazzino</h1></div><div class="user">Ciao, Fabio⌄</div></div><div class="inventory-grid">
-<div class="stockcard"><h3>T-shirt Artyou</h3><div class="stockline"><b>Nero · S</b><span>TS-N-S</span><input value="3"></div><div class="stockline"><b>Nero · M</b><span>TS-N-M</span><input value="12"></div><div class="stockline"><b>Nero · L</b><span>TS-N-L</span><input value="7"></div><div class="stockline"><b>Nero · XL</b><span>TS-N-XL</span><input value="2"></div></div>
-<div class="stockcard"><h3>Felpa Artyou</h3><div class="stockline"><b>Nero · S</b><span>FL-N-S</span><input value="2"></div><div class="stockline"><b>Nero · M</b><span>FL-N-M</span><input value="5"></div><div class="stockline"><b>Nero · L</b><span>FL-N-L</span><input value="0"></div><div class="stockline"><b>Nero · XL</b><span>FL-N-XL</span><input value="1"></div></div>
-<div class="stockcard"><h3>Pantaloni Artyou</h3><div class="stockline"><b>Nero · S</b><span>PA-N-S</span><input value="1"></div><div class="stockline"><b>Nero · M</b><span>PA-N-M</span><input value="8"></div><div class="stockline"><b>Nero · L</b><span>PA-N-L</span><input value="4"></div><div class="stockline"><b>Nero · XL</b><span>PA-N-XL</span><input value="0"></div></div>
-<div class="stockcard"><h3>Calzini antiscivolo</h3><div class="stockline"><b>Bianco · 36–39</b><span>CA-B-1</span><input value="11"></div><div class="stockline"><b>Bianco · 40–43</b><span>CA-B-2</span><input value="9"></div><div class="stockline"><b>Nero · 36–42</b><span>CA-N-1</span><input value="0"></div><button class="btn orange" style="margin-top:15px" onclick="alert('Demo: quantità salvate')">Salva magazzino</button></div>
-</div></main></div></body></html>
+
+<main class="main">
+  <div class="bar"><div><div class="small">Merch Artyou</div><h1>Magazzino</h1></div><div class="user">Ciao, Fabio⌄</div></div>
+  <nav class="inv-mobile-nav" aria-label="Navigazione amministrazione"><a href="admin.html">Panoramica</a><a href="admin-prodotti.html">Prodotti</a><a class="active" href="admin-magazzino.html">Magazzino</a><a href="admin-ordini.html">Ordini</a><a href="index.html">Shop</a></nav>
+  <div class="inv-note"><b>Versione test:</b> le quantità sono collegate ai prodotti e allo shop di questo browser. Non sono ancora condivise tra dispositivi e non vengono scalate da pagamenti reali.</div>
+  <section class="inv-stats" aria-label="Riepilogo magazzino">
+    <div class="inv-stat"><small>Pezzi in magazzino</small><strong id="total">—</strong></div>
+    <div class="inv-stat"><small>Varianti disponibili</small><strong id="available">—</strong></div>
+    <div class="inv-stat"><small>Scorta bassa (1–3)</small><strong id="low">—</strong></div>
+    <div class="inv-stat"><small>Varianti esaurite</small><strong id="out">—</strong></div>
+  </section>
+  <section class="inv-card">
+    <div class="inv-heading"><div><h2>Giacenze per variante</h2><p>Modifica ogni combinazione di modello, colore e taglia in modo indipendente.</p></div><button class="btn" id="export">↓ Esporta CSV</button></div>
+    <div class="inv-controls">
+      <input id="search" type="search" aria-label="Cerca variante" placeholder="Cerca prodotto, modello, colore, taglia o codice…">
+      <select id="product" aria-label="Filtra prodotto"><option value="">Tutti i prodotti</option></select>
+      <select id="status" aria-label="Filtra disponibilità"><option value="">Tutte le disponibilità</option><option value="ok">Disponibili</option><option value="low">Scorta bassa</option><option value="out">Esauriti</option></select>
+    </div>
+    <div class="inv-table-wrap"><table class="inv-table"><thead><tr><th>Prodotto / modello</th><th>Colore</th><th>Taglia</th><th>Codice</th><th>Quantità</th><th>Stato</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="inv-message" id="message" role="status" aria-live="polite"></div>
+    <div class="inv-footer">
+      <div class="inv-reason"><label for="reason">Motivo modifica</label><select id="reason"><option value="auto">Automatico (+ carico / − rettifica)</option><option>Carico merce</option><option>Rettifica inventario</option><option>Reso</option><option>Altro</option></select></div>
+      <div class="inv-actions"><span class="inv-count" id="pending">Nessuna modifica</span><button class="btn" id="discard" disabled>Annulla</button><button class="btn orange" id="save" disabled>Salva magazzino</button></div>
+    </div>
+  </section>
+  <section class="inv-card"><div class="inv-heading"><div><h2>Ultimi movimenti</h2><p>Storico locale delle modifiche salvate da questo pannello.</p></div></div><div class="inv-table-wrap"><table class="inv-history"><thead><tr><th>Data</th><th>Prodotto / variante</th><th>Movimento</th><th>Da → A</th><th>Motivo</th></tr></thead><tbody id="history"></tbody></table></div></section>
+</main></div>
+<script src="catalog.js"></script>
+<script>
+(function(){
+"use strict";
+var MOVEMENTS_KEY="artyou_merch_inventory_movements_v1";
+var catalog=ArtyouCatalog.getCatalog(),draft={},variants=[],message=document.getElementById("message");
+var $=function(id){return document.getElementById(id)};
+function escapeHtml(v){return String(v==null?"":v).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]})}
+function quantity(v){return Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=1000000?Number(v):null}
+function idFor(p,c,s){return JSON.stringify([p.id,c,s])}
+function statusOf(n){return n===0?"out":n<=3?"low":"ok"}
+function labelOf(s){return s==="out"?"Esaurito":s==="low"?"Scorta bassa":"Disponibile"}
+function allVariants(){var a=[];catalog.forEach(function(p){(p.colors||[]).forEach(function(c){(p.sizes||[]).forEach(function(s){var key=c+"|"+s;a.push({id:idFor(p,c,s),productId:p.id,name:p.name,model:p.model||"",color:c,size:s,key:key,code:p.id.toUpperCase().slice(0,8)+"-"+c.slice(0,2).toUpperCase()+"-"+s,stock:quantity((p.stock||{})[key])||0})})})});return a}
+function value(v){return Object.prototype.hasOwnProperty.call(draft,v.id)?draft[v.id]:v.stock}
+function changes(){return variants.filter(function(v){return value(v)!==v.stock})}
+function setMessage(t,error){message.textContent=t||"";message.className="inv-message"+(error?" error":"")}
+function renderStats(){var total=0,available=0,low=0,out=0;variants.forEach(function(v){var n=v.stock;total+=n;if(n===0)out++;else{available++;if(n<=3)low++}});$("total").textContent=total;$("available").textContent=available;$("low").textContent=low;$("out").textContent=out}
+function renderProducts(){var current=$("product").value;var options='<option value="">Tutti i prodotti</option>';catalog.forEach(function(p){options+='<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.name+" · "+(p.model||""))+'</option>'});$("product").innerHTML=options;$("product").value=current}
+function renderPending(){var n=changes().length;$("pending").textContent=n?n+" varianti da salvare":"Nessuna modifica";$("save").disabled=!n;$("discard").disabled=!n}
+function renderTable(){
+ var q=$("search").value.trim().toLocaleLowerCase("it"),product=$("product").value,status=$("status").value;
+ var filtered=variants.filter(function(v){var n=value(v);return (!product||v.productId===product)&&(!status||statusOf(n)===status)&&(!q||[v.name,v.model,v.color,v.size,v.code].join(" ").toLocaleLowerCase("it").includes(q))});
+ $("rows").innerHTML=filtered.map(function(v){var i=variants.indexOf(v),n=value(v),st=statusOf(n),dirty=n!==v.stock;
+ return '<tr class="'+(dirty?"changed":"")+'"><td class="inv-name"><b>'+escapeHtml(v.name)+'</b><small>'+escapeHtml(v.model)+'</small></td><td>'+escapeHtml(v.color)+'</td><td>'+escapeHtml(v.size)+'</td><td class="inv-code">'+escapeHtml(v.code)+'</td><td><div class="inv-qty"><button data-action="minus" data-i="'+i+'" aria-label="Riduci '+escapeHtml(v.name+" "+v.color+" "+v.size)+'">−</button><input type="number" min="0" max="1000000" step="1" data-i="'+i+'" aria-label="Quantità '+escapeHtml(v.name+" "+v.color+" "+v.size)+'" value="'+n+'"><button data-action="plus" data-i="'+i+'" aria-label="Aumenta '+escapeHtml(v.name+" "+v.color+" "+v.size)+'">+</button></div></td><td><span class="inv-badge '+st+'">'+labelOf(st)+'</span></td></tr>'}).join("")||'<tr><td colspan="6" class="inv-empty">Nessuna variante corrisponde ai filtri.</td></tr>';
+ renderPending();
+}
+function history(){var items=[];try{items=JSON.parse(localStorage.getItem(MOVEMENTS_KEY))||[]}catch(e){}$("history").innerHTML=items.slice(0,30).map(function(x){var delta=x.after-x.before;return '<tr><td>'+escapeHtml(new Date(x.at).toLocaleString("it-IT"))+'</td><td>'+escapeHtml(x.product+" · "+x.model)+'<br><small>'+escapeHtml(x.color+" · "+x.size)+'</small></td><td class="'+(delta>=0?"plus":"minus")+'">'+(delta>0?"+":"")+delta+'</td><td>'+x.before+" → "+x.after+'</td><td>'+escapeHtml(x.reason)+'</td></tr>'}).join("")||'<tr><td colspan="5" class="inv-empty">Nessun movimento registrato. I valori iniziali non costituiscono movimenti.</td></tr>'}
+function refresh(){catalog=ArtyouCatalog.getCatalog();draft={};variants=allVariants();renderStats();renderProducts();renderTable();history()}
+$("rows").addEventListener("click",function(e){var b=e.target.closest("button[data-action]");if(!b)return;var v=variants[Number(b.dataset.i)];if(!v)return;var next=value(v)+(b.dataset.action==="plus"?1:-1);if(next<0||next>1000000)return;draft[v.id]=next;renderTable();setMessage("")});
+$("rows").addEventListener("change",function(e){var input=e.target.closest("input[data-i]");if(!input)return;var v=variants[Number(input.dataset.i)];if(!v)return;var n=quantity(input.value);if(n===null){input.value=value(v);setMessage("Inserisci una quantità intera da 0 a 1.000.000.",true);return}draft[v.id]=n;renderTable();setMessage("")});
+["search","product","status"].forEach(function(id){$(id).addEventListener(id==="search"?"input":"change",renderTable)});
+$("discard").addEventListener("click",function(){draft={};renderTable();setMessage("Modifiche annullate.")});
+$("save").addEventListener("click",function(){
+ var edited=changes();if(!edited.length)return;
+ var fresh=ArtyouCatalog.getCatalog();
+ var conflict=edited.some(function(v){var p=fresh.find(function(x){return x.id===v.productId});return !p||!p.colors.includes(v.color)||!p.sizes.includes(v.size)||(quantity((p.stock||{})[v.key])||0)!==v.stock});
+ if(conflict){setMessage("Il catalogo è cambiato in un'altra scheda. Annulla le modifiche e ricarica il magazzino prima di salvare.",true);return}
+ var reason=$("reason").value,at=new Date().toISOString(),movements=[];
+ edited.forEach(function(v){var p=fresh.find(function(x){return x.id===v.productId}),after=value(v);p.stock=p.stock||{};p.stock[v.key]=after;movements.push({at:at,product:v.name,model:v.model,color:v.color,size:v.size,before:v.stock,after:after,reason:reason==="auto"?(after>v.stock?"Carico merce":"Rettifica inventario"):reason})});
+ try{ArtyouCatalog.saveCatalog(fresh);var old=[];try{old=JSON.parse(localStorage.getItem(MOVEMENTS_KEY))||[]}catch(e){}localStorage.setItem(MOVEMENTS_KEY,JSON.stringify(movements.reverse().concat(old).slice(0,500)));refresh();setMessage(edited.length+" varianti salvate. Le disponibilità aggiornate sono visibili nello shop di questo browser.")}catch(e){setMessage("Impossibile completare il salvataggio locale: "+e.message,true)}
+});
+$("export").addEventListener("click",function(){var fresh=allVariants(),lines=[["Prodotto","Modello","Colore","Taglia","Codice","Quantità","Stato"]];fresh.forEach(function(v){lines.push([v.name,v.model,v.color,v.size,v.code,v.stock,labelOf(statusOf(v.stock))])});var csv="\uFEFF"+lines.map(function(row){return row.map(function(cell){return '"'+String(cell).replace(/"/g,'""')+'"'}).join(";")}).join("\r\n");var blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="artyou-magazzino.csv";a.click();URL.revokeObjectURL(url)});
+window.addEventListener("storage",function(e){if(e.key==="artyou_merch_catalog_v3"){if(changes().length){setMessage("Il catalogo è cambiato in un'altra scheda: salva solo dopo aver verificato i dati, oppure annulla e ricarica.",true)}else{refresh();setMessage("Catalogo aggiornato da un'altra scheda.")}}else if(e.key===MOVEMENTS_KEY)history()});
+window.addEventListener("beforeunload",function(e){if(changes().length){e.preventDefault();e.returnValue=""}});
+refresh();
+})();
+</script></body></html>
