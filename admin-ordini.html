@@ -49,6 +49,6 @@ $("rows").addEventListener("click",function(e){var b=e.target.closest("[data-id]
 $("close").onclick=function(){$("modal").classList.remove("open")};$("modal").addEventListener("click",function(e){if(e.target===$("modal"))$("modal").classList.remove("open")});
 $("detail").addEventListener("click",function(e){var b=e.target.closest("[data-action]");if(!b)return;if(b.dataset.action==="status")saveStatus(b.dataset.id,$("modalStatus").value);if(b.dataset.action==="cancel"&&confirm("Annullare questo ordine test?"))saveStatus(b.dataset.id,"Annullato")});
 $("export").onclick=function(){var list=filtered(),rows=[["Ordine","Data","Cliente","Email","Articoli","Totale","Pagamento","Consegna","Stato"]];list.forEach(function(o){rows.push([o.id,date(o.createdAt),o.customer.name,o.customer.email,o.items.reduce(function(a,i){return a+Number(i.qty||0)},0),Number(o.total||0).toFixed(2),o.payment,o.delivery,o.status])});var csv="\uFEFF"+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"'}).join(";")}).join("\r\n"),blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="artyou-ordini.csv";a.click();URL.revokeObjectURL(url)};
-window.addEventListener("storage",function(e){if(e.key==="artyou_merch_orders_v1")render()});render();
+window.addEventListener("storage",function(e){if(e.key==="artyou_merch_orders_v1")render()});render();var requested=new URLSearchParams(location.search).get("order");if(requested)openOrder(requested);
 })();
 </script></body></html>
