@@ -21,4 +21,5 @@ function renderDashboard(){
  document.getElementById("bestSellers").innerHTML=top.map(function(x){var p=catalog.find(function(c){return c.id===x.id}),img=p&&p.image?p.image:"img/artyou-merch-sprite.jpg";return '<div class="best"><img src="'+esc(img)+'" onerror="this.src=\'img/artyou-merch-sprite.jpg\'"><div><b>'+esc(x.data.name+(x.data.model?" · "+x.data.model:""))+'</b><small>'+x.data.qty+' vendite</small></div><strong>'+euro.format(x.data.total)+'</strong></div>'}).join("")||'<p style="font-size:13px;color:#777">Nessuna vendita registrata.</p>';
 }
 window.addEventListener("storage",function(e){if(e.key==="artyou_merch_orders_v1"||e.key==="artyou_merch_catalog_v3")renderDashboard()});renderDashboard();
+})();
 </script></body></html>
