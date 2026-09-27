@@ -39,7 +39,7 @@
   <section class="inv-stats" aria-label="Riepilogo magazzino">
     <div class="inv-stat"><small>Pezzi in magazzino</small><strong id="total">—</strong></div>
     <div class="inv-stat"><small>Varianti disponibili</small><strong id="available">—</strong></div>
-    <div class="inv-stat"><small>Scorta bassa (1–3)</small><strong id="low">—</strong></div>
+    <div class="inv-stat"><small id="lowLabel">Scorta bassa</small><strong id="low">—</strong></div>
     <div class="inv-stat"><small>Varianti esaurite</small><strong id="out">—</strong></div>
   </section>
   <section class="inv-card">
@@ -58,23 +58,23 @@
   </section>
   <section class="inv-card"><div class="inv-heading"><div><h2>Ultimi movimenti</h2><p>Storico locale delle modifiche salvate da questo pannello.</p></div></div><div class="inv-table-wrap"><table class="inv-history"><thead><tr><th>Data</th><th>Prodotto / variante</th><th>Movimento</th><th>Da → A</th><th>Motivo</th></tr></thead><tbody id="history"></tbody></table></div></section>
 </main></div>
-<script src="catalog.js"></script>
+<script src="catalog.js"></script><script src="settings.js"></script>
 <script>
 (function(){
 "use strict";
-var MOVEMENTS_KEY="artyou_merch_inventory_movements_v1";
+var MOVEMENTS_KEY="artyou_merch_inventory_movements_v1",settings=ArtyouSettings.get();
 var catalog=ArtyouCatalog.getCatalog(),draft={},variants=[],message=document.getElementById("message");
 var $=function(id){return document.getElementById(id)};
 function escapeHtml(v){return String(v==null?"":v).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]})}
 function quantity(v){return Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=1000000?Number(v):null}
 function idFor(p,c,s){return JSON.stringify([p.id,c,s])}
-function statusOf(n){return n===0?"out":n<=3?"low":"ok"}
+function statusOf(n){return n===0?"out":n<=settings.lowStockThreshold?"low":"ok"}
 function labelOf(s){return s==="out"?"Esaurito":s==="low"?"Scorta bassa":"Disponibile"}
 function allVariants(){var a=[];catalog.forEach(function(p){(p.colors||[]).forEach(function(c){(p.sizes||[]).forEach(function(s){var key=c+"|"+s;a.push({id:idFor(p,c,s),productId:p.id,name:p.name,model:p.model||"",color:c,size:s,key:key,code:p.id.toUpperCase().slice(0,8)+"-"+c.slice(0,2).toUpperCase()+"-"+s,stock:quantity((p.stock||{})[key])||0})})})});return a}
 function value(v){return Object.prototype.hasOwnProperty.call(draft,v.id)?draft[v.id]:v.stock}
 function changes(){return variants.filter(function(v){return value(v)!==v.stock})}
 function setMessage(t,error){message.textContent=t||"";message.className="inv-message"+(error?" error":"")}
-function renderStats(){var total=0,available=0,low=0,out=0;variants.forEach(function(v){var n=v.stock;total+=n;if(n===0)out++;else{available++;if(n<=3)low++}});$("total").textContent=total;$("available").textContent=available;$("low").textContent=low;$("out").textContent=out}
+function renderStats(){var total=0,available=0,low=0,out=0;variants.forEach(function(v){var n=v.stock;total+=n;if(n===0)out++;else{available++;if(n<=settings.lowStockThreshold)low++}});$("total").textContent=total;$("available").textContent=available;$("low").textContent=low;$("out").textContent=out}
 function renderProducts(){var current=$("product").value;var options='<option value="">Tutti i prodotti</option>';catalog.forEach(function(p){options+='<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.name+" · "+(p.model||""))+'</option>'});$("product").innerHTML=options;$("product").value=current}
 function renderPending(){var n=changes().length;$("pending").textContent=n?n+" varianti da salvare":"Nessuna modifica";$("save").disabled=!n;$("discard").disabled=!n}
 function renderTable(){
@@ -85,7 +85,7 @@ function renderTable(){
  renderPending();
 }
 function history(){var items=[];try{items=JSON.parse(localStorage.getItem(MOVEMENTS_KEY))||[]}catch(e){}$("history").innerHTML=items.slice(0,30).map(function(x){var delta=x.after-x.before;return '<tr><td>'+escapeHtml(new Date(x.at).toLocaleString("it-IT"))+'</td><td>'+escapeHtml(x.product+" · "+x.model)+'<br><small>'+escapeHtml(x.color+" · "+x.size)+'</small></td><td class="'+(delta>=0?"plus":"minus")+'">'+(delta>0?"+":"")+delta+'</td><td>'+x.before+" → "+x.after+'</td><td>'+escapeHtml(x.reason)+'</td></tr>'}).join("")||'<tr><td colspan="5" class="inv-empty">Nessun movimento registrato. I valori iniziali non costituiscono movimenti.</td></tr>'}
-function refresh(){catalog=ArtyouCatalog.getCatalog();draft={};variants=allVariants();renderStats();renderProducts();renderTable();history()}
+function refresh(){settings=ArtyouSettings.get();document.getElementById("lowLabel").textContent="Scorta bassa (1–"+settings.lowStockThreshold+")";catalog=ArtyouCatalog.getCatalog();draft={};variants=allVariants();renderStats();renderProducts();renderTable();history()}
 $("rows").addEventListener("click",function(e){var b=e.target.closest("button[data-action]");if(!b)return;var v=variants[Number(b.dataset.i)];if(!v)return;var next=value(v)+(b.dataset.action==="plus"?1:-1);if(next<0||next>1000000)return;draft[v.id]=next;renderTable();setMessage("")});
 $("rows").addEventListener("change",function(e){var input=e.target.closest("input[data-i]");if(!input)return;var v=variants[Number(input.dataset.i)];if(!v)return;var n=quantity(input.value);if(n===null){input.value=value(v);setMessage("Inserisci una quantità intera da 0 a 1.000.000.",true);return}draft[v.id]=n;renderTable();setMessage("")});
 ["search","product","status"].forEach(function(id){$(id).addEventListener(id==="search"?"input":"change",renderTable)});
@@ -100,7 +100,7 @@ $("save").addEventListener("click",function(){
  try{ArtyouCatalog.saveCatalog(fresh);var old=[];try{old=JSON.parse(localStorage.getItem(MOVEMENTS_KEY))||[]}catch(e){}localStorage.setItem(MOVEMENTS_KEY,JSON.stringify(movements.reverse().concat(old).slice(0,500)));refresh();setMessage(edited.length+" varianti salvate. Le disponibilità aggiornate sono visibili nello shop di questo browser.")}catch(e){setMessage("Impossibile completare il salvataggio locale: "+e.message,true)}
 });
 $("export").addEventListener("click",function(){var fresh=allVariants(),lines=[["Prodotto","Modello","Colore","Taglia","Codice","Quantità","Stato"]];fresh.forEach(function(v){lines.push([v.name,v.model,v.color,v.size,v.code,v.stock,labelOf(statusOf(v.stock))])});var csv="\uFEFF"+lines.map(function(row){return row.map(function(cell){return '"'+String(cell).replace(/"/g,'""')+'"'}).join(";")}).join("\r\n");var blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="artyou-magazzino.csv";a.click();URL.revokeObjectURL(url)});
-window.addEventListener("storage",function(e){if(e.key==="artyou_merch_catalog_v3"){if(changes().length){setMessage("Il catalogo è cambiato in un'altra scheda: salva solo dopo aver verificato i dati, oppure annulla e ricarica.",true)}else{refresh();setMessage("Catalogo aggiornato da un'altra scheda.")}}else if(e.key===MOVEMENTS_KEY)history()});
+window.addEventListener("storage",function(e){if(e.key==="artyou_merch_catalog_v3"){if(changes().length){setMessage("Il catalogo è cambiato in un'altra scheda: salva solo dopo aver verificato i dati, oppure annulla e ricarica.",true)}else{refresh();setMessage("Catalogo aggiornato da un'altra scheda.")}}else if(e.key===MOVEMENTS_KEY)history();else if(e.key===ArtyouSettings.KEY){settings=ArtyouSettings.get();refresh()}});
 window.addEventListener("beforeunload",function(e){if(changes().length){e.preventDefault();e.returnValue=""}});
 refresh();
 })();
