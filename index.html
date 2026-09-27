@@ -27,8 +27,8 @@
   </form>
  </div>
 </div></div>
-<script src="catalog.js"></script><script src="orders.js"></script><script>
-let catalog=ArtyouCatalog.getCatalog(),cart=[];
+<script src="catalog.js"></script><script src="settings.js"></script><script src="orders.js"></script><script>
+let catalog=ArtyouCatalog.getCatalog(),cart=[],settings=ArtyouSettings.get();
 const euro=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(n);
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function dotClass(c){let x=c.toLowerCase();return x.includes("bianc")?"white":x.includes("bordeaux")?"wine":x.includes("grigi")?"gray":""}
@@ -43,17 +43,18 @@ function renderCart(){let t=0;document.getElementById("rows").innerHTML=cart.map
 function groupedCart(){let map={};cart.forEach(x=>{let k=[x.id,x.c,x.s].join("|");if(!map[k])map[k]={...x,qty:0};map[k].qty++});return Object.values(map)}
 function openCheckout(){if(!cart.length)return;document.getElementById("cart").classList.remove("open");renderCheckoutSummary();document.getElementById("checkoutModal").classList.add("open")}
 function closeCheckout(){document.getElementById("checkoutModal").classList.remove("open")}
-function renderCheckoutSummary(){let items=groupedCart(),total=items.reduce((a,x)=>a+x.p*x.qty,0);document.getElementById("checkoutItems").innerHTML=items.map(x=>'<div class="summary-row"><div><b>'+esc(x.n)+'</b><small>'+esc(x.c)+' · '+esc(x.s)+' · Q.tà '+x.qty+'</small></div><b>'+euro(x.p*x.qty)+'</b></div>').join("");document.getElementById("checkoutTotal").textContent=euro(total)}
-function deliveryChanged(){let shipping=document.querySelector('input[name="delivery"]:checked').value==="Spedizione";document.getElementById("addressFields").hidden=!shipping;["address","zip","city"].forEach(n=>document.querySelector('[name="'+n+'"]').required=shipping);document.getElementById("shippingLabel").textContent=shipping?"Non applicata nella demo":"Ritiro gratuito"}
+function checkoutAmounts(){let subtotal=groupedCart().reduce((a,x)=>a+x.p*x.qty,0),delivery=document.querySelector('input[name="delivery"]:checked'),shipping=delivery&&delivery.value==="Spedizione"?ArtyouSettings.shippingFor(subtotal,settings):0;return {subtotal,shipping,total:subtotal+shipping}}
+function renderCheckoutSummary(){let items=groupedCart(),a=checkoutAmounts();document.getElementById("checkoutItems").innerHTML=items.map(x=>'<div class="summary-row"><div><b>'+esc(x.n)+'</b><small>'+esc(x.c)+' · '+esc(x.s)+' · Q.tà '+x.qty+'</small></div><b>'+euro(x.p*x.qty)+'</b></div>').join("");document.getElementById("shippingLabel").textContent=a.shipping?euro(a.shipping):(document.querySelector('input[name="delivery"]:checked')?.value==="Spedizione"?"Gratuita":"Ritiro gratuito");document.getElementById("checkoutTotal").textContent=euro(a.total)}
+function deliveryChanged(){let selected=document.querySelector('input[name="delivery"]:checked'),shipping=selected&&selected.value==="Spedizione";document.getElementById("addressFields").hidden=!shipping;["address","zip","city"].forEach(n=>document.querySelector('[name="'+n+'"]').required=shipping);renderCheckoutSummary()}
 function createTestOrder(e){
  e.preventDefault();let form=e.currentTarget,error=document.getElementById("checkoutError");error.textContent="";
  if(!form.reportValidity())return;
  let data=new FormData(form),fresh=ArtyouCatalog.getCatalog(),items=groupedCart(),resolved=[],short=[];
  items.forEach(x=>{let p=fresh.find(v=>v.id===x.id),q=p?Number((p.stock||{})[x.c+"|"+x.s]||0):0;if(!p||!p.active||q<x.qty)short.push(x.n+" · "+x.c+" · "+x.s);else resolved.push({product:p,cart:x,before:q})});
  if(short.length){error.textContent="Disponibilità cambiata per: "+short.join(", ")+". Aggiorna il carrello.";refreshShop();return}
- let beforeCatalog=JSON.parse(JSON.stringify(fresh)),orders=ArtyouOrders.getOrders(),id=ArtyouOrders.nextId(orders),delivery=data.get("delivery"),payment=data.get("payment"),total=items.reduce((a,x)=>a+x.p*x.qty,0);
+ let beforeCatalog=JSON.parse(JSON.stringify(fresh)),orders=ArtyouOrders.getOrders(),id=ArtyouOrders.nextId(orders),delivery=data.get("delivery"),payment=data.get("payment"),amounts=checkoutAmounts(),total=amounts.total;
  resolved.forEach(r=>r.product.stock[r.cart.c+"|"+r.cart.s]=r.before-r.cart.qty);
- let order={id,createdAt:new Date().toISOString(),customer:{name:String(data.get("name")).trim(),email:String(data.get("email")).trim(),phone:String(data.get("phone")).trim(),address:delivery==="Spedizione"?{street:String(data.get("address")).trim(),zip:String(data.get("zip")).trim(),city:String(data.get("city")).trim()}:null},items:resolved.map(r=>({productId:r.product.id,name:r.product.name,model:r.product.model,color:r.cart.c,size:r.cart.s,qty:r.cart.qty,price:r.cart.p})),total,payment,paymentStatus:"Pagato",delivery,status:"Da preparare",notes:"Ordine creato dal checkout test. Nessun pagamento reale.",tracking:"",stockApplied:true};
+ let order={id,createdAt:new Date().toISOString(),customer:{name:String(data.get("name")).trim(),email:String(data.get("email")).trim(),phone:String(data.get("phone")).trim(),address:delivery==="Spedizione"?{street:String(data.get("address")).trim(),zip:String(data.get("zip")).trim(),city:String(data.get("city")).trim()}:null},items:resolved.map(r=>({productId:r.product.id,name:r.product.name,model:r.product.model,color:r.cart.c,size:r.cart.s,qty:r.cart.qty,price:r.cart.p})),subtotal:amounts.subtotal,shippingCost:amounts.shipping,total,payment,paymentStatus:"Pagato",delivery,status:"Da preparare",notes:"Ordine creato dal checkout test. Nessun pagamento reale.",tracking:"",stockApplied:true};
  try{
   ArtyouCatalog.saveCatalog(fresh);orders.unshift(order);ArtyouOrders.saveOrders(orders);
   let key="artyou_merch_inventory_movements_v1",mov=[];try{mov=JSON.parse(localStorage.getItem(key))||[]}catch(_){}
@@ -63,10 +64,11 @@ function createTestOrder(e){
  cart=[];catalog=fresh;renderCart();refreshShop();showSuccess(order)
 }
 function showSuccess(order){document.getElementById("checkoutContent").innerHTML='<div class="success-view"><div class="tick">✓</div><h2>Ordine #'+esc(order.id)+' creato</h2><p>Il pagamento <b>'+esc(order.payment)+'</b> è stato simulato. L\'ordine è ora in <b>Da preparare</b> e le giacenze sono state scalate.</p><div class="success-actions"><button class="primary" onclick="location.reload()">Continua lo shopping</button><a href="admin-ordini.html">Apri gestione ordini →</a><a href="admin-magazzino.html">Controlla magazzino →</a></div></div>'}
+function applySettings(){settings=ArtyouSettings.get();let pickup=document.querySelector('input[name="delivery"][value="Ritiro in sede"]'),ship=document.querySelector('input[name="delivery"][value="Spedizione"]'),card=document.querySelector('input[name="payment"][value="Carta"]'),paypal=document.querySelector('input[name="payment"][value="PayPal"]');pickup.closest("label").style.display=settings.pickupEnabled?"block":"none";ship.closest("label").style.display=settings.shippingEnabled?"block":"none";card.closest("label").style.display=settings.cardEnabled?"block":"none";paypal.closest("label").style.display=settings.paypalEnabled?"block":"none";pickup.closest("label").querySelector("b").textContent=settings.pickupLabel||"Ritiro in sede";ship.closest("label").querySelector("span").textContent=settings.shippingCost?euro(settings.shippingCost):"Gratuita";if(settings.freeShippingEnabled)ship.closest("label").querySelector("span").textContent+=" · gratis da "+euro(settings.freeShippingThreshold);if(!settings.pickupEnabled)ship.checked=true;if(!settings.shippingEnabled)pickup.checked=true;if(!settings.cardEnabled)paypal.checked=true;if(!settings.paypalEnabled)card.checked=true;deliveryChanged()}
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderProducts(b.textContent.trim())});
 document.querySelectorAll('input[name="delivery"]').forEach(x=>x.addEventListener("change",deliveryChanged));document.getElementById("checkoutForm").addEventListener("submit",createTestOrder);document.getElementById("checkoutModal").addEventListener("click",e=>{if(e.target===document.getElementById("checkoutModal"))closeCheckout()});
-renderProducts();renderCart();deliveryChanged();
+renderProducts();renderCart();applySettings();
 function refreshShop(){catalog=ArtyouCatalog.getCatalog();let selected=document.querySelector(".tabs button.active");renderProducts(selected?selected.textContent.trim():"Tutti")}
-window.addEventListener("storage",function(e){if(e.key==="artyou_merch_catalog_v3")refreshShop()});
+window.addEventListener("storage",function(e){if(e.key==="artyou_merch_catalog_v3")refreshShop();if(e.key===ArtyouSettings.KEY)applySettings()});
 window.addEventListener("focus",function(){let latest=ArtyouCatalog.getCatalog();if(JSON.stringify(latest)!==JSON.stringify(catalog))refreshShop()});
 </script></body></html>
